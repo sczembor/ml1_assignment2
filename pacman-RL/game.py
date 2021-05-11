@@ -709,12 +709,11 @@ class Game(object):
 
             # For Q-learning: update Q-table
             if agentIndex == 0:
-                print("czy ja tutaj jestem???")
+                print("Am I here?")
                 agent.update(observation, action, self.state, agent.getReward(observation, action, self.state))
                 
                 
             # Change the display
-            print("jestem w game run i state.data = ",self.state)
             self.display.update( self.state.data )
             ###idx = agentIndex - agentIndex % 2 + 1
             ###self.display.update( self.state.makeObservation(idx).data )

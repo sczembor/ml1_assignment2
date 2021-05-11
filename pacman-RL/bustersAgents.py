@@ -288,26 +288,70 @@ class QLearningAgent(BustersAgent):
     def registerInitialState(self, gameState):
         BustersAgent.registerInitialState(self, gameState)
         self.distancer = Distancer(gameState.data.layout, False)
-        self.epsilon = 0.0
-        self.alpha = 0.5
-        self.discount = 0.8
+        self.epsilon = 0.1 #1 = always random, 0 = non random/ funtion to decrease the epsilon
+        self.alpha = 0.2 #learning rate, the bigger the more impact new valus has on the q table 
+        self.discount = 0.95
         self.actions = {"North":0, "East":1, "South":2, "West":3}
+        self.distance = {"VeryClose":0, "Close":1, "Far":2, "VeryFar":3}
+
+        #i can add more variables here representing dictionaries for the distance to the ghost. it will make the computation easier
+
         if os.path.exists("qtable.txt"):
             self.table_file = open("qtable.txt", "r+")
             self.q_table = self.readQtable()
         else:
             self.table_file = open("qtable.txt", "w+")
             #"*** CHECK: NUMBER OF ROWS IN QTABLE DEPENDS ON THE NUMBER OF STATES ***"
-            self.initializeQtable(9)
+            #
+            self.initializeQtable(16)
 
     def initializeQtable(self, nrows):
         "Initialize qtable"
         self.q_table = np.zeros((nrows,len(self.actions)))
 
     def computeState(self, state):
+        # check if state.data.ghostDIstances is not None!!!
         min_index = state.data.ghostDistances.index(min(state.data.ghostDistances))
         #return (state.getPacmanPosition()[0],state.getPacmanPosition()[1],state.getGhostPositions()[min_index][0],state.getGhostPositions()[min_index][1],min(state.data.ghostDistances))
-        return (min(state.data.ghostDistances),)
+        #computing distance to nearest ghosr and discretizing it
+        # include info about pac dots and about walls/ first pacdots and ghost.
+
+        distance = min(state.data.ghostDistances)
+        dis = ""
+        if(distance <4):
+            dis = "VeryClose"
+        elif(distance >=4 and distance <8):
+            dis = "Close"
+        elif(distance >=8 and distance <12):
+            dis = "Far"
+        else:
+            dis = "VeryFar"
+        #computing relative position to the nearest ghost
+        pac_x = state.getPacmanPosition()[0]
+        pac_y = state.getPacmanPosition()[1]
+        ghost_x = state.getGhostPositions()[min_index][0]
+        ghost_y = state.getGhostPositions()[min_index][1]
+        print(f'pacman: x={pac_x}, y={pac_y}')
+        print(f'ghost: x={ghost_x}, y={ghost_y}')
+        x_dif = pac_x - ghost_x #11
+        y_dif = pac_y - ghost_y #-6
+        pos = ""
+        if(y_dif == 0 or abs(x_dif) > abs(y_dif)):#the more important is EAST/WEST
+            if(x_dif > 0):
+                pos = "West"
+            else:
+                pos = "East"
+        else:#more significant NORTH/SOUTH
+            if(y_dif > 0):
+                pos = "South"
+            else:
+                pos = "North"
+
+
+        print("my tuple",(dis,pos))
+
+        return (dis,pos)
+    
 
     def readQtable(self):
         "Read qtable from disc"
@@ -353,8 +397,9 @@ class QLearningAgent(BustersAgent):
         "*** YOUR CODE HERE ***" 
 
         n_state = self.computeState(state)
-        print('n_state = ',n_state)
-        return 4  
+    
+        print('Qtable row:',(self.distance[n_state[0]] *4) +self.actions[n_state[1]])
+        return (self.distance[n_state[0]] *4) +self.actions[n_state[1]]
         util.raiseNotDefined()
 
 
@@ -446,16 +491,16 @@ class QLearningAgent(BustersAgent):
         
         """
 
-        print('Jestem w update i to jest state:',state)
-
-        print('A to jest nextState:',nextState)
         position = self.computePosition(state)
+        print(nextState)
         next_position = self.computePosition(nextState)
         action_column = self.actions[action]
-        #if nextState =='TERMINAL_STATE':
-        #    self.q_table[position][action_column] = (1-self.alpha) * self.q_table[position][action_column] + self.alpha * reward
-        #else:
-        self.q_table[position][action_column] = (1-self.alpha) * self.q_table[position][action_column] + self.alpha * (reward + self.discount * max(self.q_table[next_position][:]))        
+        #temrinal estate every time you eat something, or when you eat all the ghosts
+
+        if reward > 10:
+            self.q_table[position][action_column] = (1-self.alpha) * self.q_table[position][action_column] + self.alpha * reward
+        else:
+            self.q_table[position][action_column] = (1-self.alpha) * self.q_table[position][action_column] + self.alpha * (reward + self.discount * max(self.q_table[next_position][:]))        
         #util.raiseNotDefined()
 
 
@@ -472,8 +517,19 @@ class QLearningAgent(BustersAgent):
         "Return the obtained reward"
         
         "*** YOUR CODE HERE ***"
-        print("funckja reward zwraca to:",nextstate.getScore() - state.getScore())
-        return nextstate.getScore() - state.getScore()        
+        '''
+        we can try the distance to the desired ghost, if the distance is lower it means we are getting closer,
+        if it incereases we can penalize the agent because its not good
+        '''
+        reward = nextstate.getScore() - state.getScore()
+        n_state = self.computeState(state)
+        print("(Action,state.action)=",(action,n_state[1]))
+        if action == n_state[1]:
+            reward += 5
+        else:
+            reward -= 5
+        print("Reward funciton returns:",reward)
+        return reward        
         util.raiseNotDefined()
 
 
