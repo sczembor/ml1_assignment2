@@ -311,7 +311,10 @@ class QLearningAgent(BustersAgent):
 
     def computeState(self, state):
         # check if state.data.ghostDIstances is not None!!!
-
+        for i in range(len(state.data.ghostDistances)):
+            if state.data.ghostDistances[i]==None:
+                state.data.ghostDistances[i]=1000
+        print(state.data.ghostDistances)
         
         min_index = state.data.ghostDistances.index(min(state.data.ghostDistances))
         #return (state.getPacmanPosition()[0],state.getPacmanPosition()[1],state.getGhostPositions()[min_index][0],state.getGhostPositions()[min_index][1],min(state.data.ghostDistances))
@@ -353,7 +356,7 @@ class QLearningAgent(BustersAgent):
         print("my tuple",(dis,pos))
         posDot=state.getNearestFood
         print(posDot())
-        return (dis,pos)
+        return (dis,pos, posDot)
     
 
     def readQtable(self):
