@@ -245,6 +245,73 @@ class GameState(object):
 
         else:
             return None;
+        
+    def getNearestFood(self):
+        """
+        Returns the distance to the nearest food
+        """
+        if(self.getNumFood() > 0):
+            minDistance = 900000
+            pacmanPosition = self.getPacmanPosition()
+            x=pacmanPosition[0]
+            y=pacmanPosition[1]
+            a=[]
+            b=[]
+            nearest=[]
+            for i in range(self.data.layout.width):
+                for j in range(self.data.layout.height):
+                    if self.hasFood(i, j):
+                        foodPosition = i, j
+                        distance = util.manhattanDistance(pacmanPosition, foodPosition)
+                        if x==i and y<j:
+                            direc=0
+                        elif x<i and y<j:
+                            direc=1
+                        elif x<i and y==j:
+                            direc=2
+                        elif x<i and y>j:
+                            direc=3
+                        elif x==i and y>j:
+                            direc=4
+                        elif x>i and y>j:
+                            direc=5
+                        elif x>i and y==j:
+                            direc=6
+                        elif x>i and y<j:
+                            direc=7
+                        else:
+                            direc=8
+                        a.append(direc)
+                        nearest.append([distance,nearest])
+            index=sorted(range(len(nearest)), key=lambda i: nearest[i], reverse=True)[:2]
+            for i in index:
+                b.append(a[i])
+            n=b.count(0)
+            ne=b.count(1)
+            e=b.count(2)
+            se=b.count(3)
+            s=b.count(4)
+            sw=b.count(5)
+            w=b.count(6)
+            nw=b.count(7)
+            er=b.count(8)
+            s=[n,ne,e,se,s,sw,w,nw,er]
+            destination=max(s)
+            print("Most of the closest dots are on:",destination)
+            if destination==n:
+                pos2="NORTH"
+            if destination==ne or destination==e or destination==e:
+                pos2="EAST"
+            if destination==s:
+                pos2="SOUTH"
+            if destination==sw or destination==w or destination==nw:
+                pos2="WEST"
+            else:
+                pos2=None
+            return pos2
+            
+        else:
+            return None;
 
     def getGhostPositions(self):
         return self.ghostPositions
