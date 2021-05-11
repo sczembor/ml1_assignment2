@@ -311,11 +311,13 @@ class QLearningAgent(BustersAgent):
 
     def computeState(self, state):
         # check if state.data.ghostDIstances is not None!!!
+
+        
         min_index = state.data.ghostDistances.index(min(state.data.ghostDistances))
         #return (state.getPacmanPosition()[0],state.getPacmanPosition()[1],state.getGhostPositions()[min_index][0],state.getGhostPositions()[min_index][1],min(state.data.ghostDistances))
         #computing distance to nearest ghosr and discretizing it
         # include info about pac dots and about walls/ first pacdots and ghost.
-
+        #distanceDot=state.data.getDistanceNearestFood()
         distance = min(state.data.ghostDistances)
         dis = ""
         if(distance <4):
@@ -349,7 +351,8 @@ class QLearningAgent(BustersAgent):
 
 
         print("my tuple",(dis,pos))
-
+        posDot=state.getNearestFood
+        print(posDot())
         return (dis,pos)
     
 
