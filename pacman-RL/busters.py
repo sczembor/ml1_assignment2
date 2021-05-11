@@ -296,17 +296,19 @@ class GameState(object):
             nw=b.count(7)
             er=b.count(8)
             s=[n,ne,e,se,s,sw,w,nw,er]
-            destination=max(s)
+            print(s)
+            
+            destination=s.index(max(s))
             print("Most of the closest dots are on:",destination)
-            if destination==n:
+            if destination==0:
                 pos2="NORTH"
-            if destination==ne or destination==e or destination==e:
+            if destination==1 or destination==2 or destination==3:
                 pos2="EAST"
-            if destination==s:
+            if destination==4:
                 pos2="SOUTH"
-            if destination==sw or destination==w or destination==nw:
+            if destination==5 or destination==6 or destination==7:
                 pos2="WEST"
-            else:
+            if destination==8:
                 pos2=None
             return pos2
             
