@@ -293,6 +293,7 @@ class QLearningAgent(BustersAgent):
         self.discount = 0.95
         self.actions = {"North":0, "East":1, "South":2, "West":3}
         self.distance = {"VeryClose":0, "Close":1, "Far":2, "VeryFar":3}
+        self.posDot={"North":0, "East":1, "South":2, "West":3, None:4}
 
         #i can add more variables here representing dictionaries for the distance to the ghost. it will make the computation easier
 
@@ -303,8 +304,8 @@ class QLearningAgent(BustersAgent):
             self.table_file = open("qtable.txt", "w+")
             #"*** CHECK: NUMBER OF ROWS IN QTABLE DEPENDS ON THE NUMBER OF STATES ***"
             #
-            self.initializeQtable(16)
-
+            self.initializeQtable(80)
+            #self.initializeQtable(16)
     def initializeQtable(self, nrows):
         "Initialize qtable"
         self.q_table = np.zeros((nrows,len(self.actions)))
@@ -316,6 +317,9 @@ class QLearningAgent(BustersAgent):
                 state.data.ghostDistances[i]=1000
         print(state.data.ghostDistances)
         
+        #if state.getNearestFood==None:
+        #        state.getNearestFood=1
+                
         min_index = state.data.ghostDistances.index(min(state.data.ghostDistances))
         #return (state.getPacmanPosition()[0],state.getPacmanPosition()[1],state.getGhostPositions()[min_index][0],state.getGhostPositions()[min_index][1],min(state.data.ghostDistances))
         #computing distance to nearest ghosr and discretizing it
@@ -352,11 +356,12 @@ class QLearningAgent(BustersAgent):
             else:
                 pos = "North"
 
-
-        print("my tuple",(dis,pos))
         posDot=state.getNearestFood
-        print(posDot())
-        return (dis,pos, posDot)
+        print("my tuple",(dis,pos, posDot()))
+        
+        #print(posDot())
+        return (dis,pos,posDot())
+        #return (dis,pos)
     
 
     def readQtable(self):
@@ -404,8 +409,9 @@ class QLearningAgent(BustersAgent):
 
         n_state = self.computeState(state)
     
-        print('Qtable row:',(self.distance[n_state[0]] *4) +self.actions[n_state[1]])
-        return (self.distance[n_state[0]] *4) +self.actions[n_state[1]]
+        print('Qtable row:',(self.distance[n_state[0]] *4) +self.actions[n_state[1]]+(self.posDot[n_state[2]]*5) )
+        return (self.distance[n_state[0]] *4) +self.actions[n_state[1]]+(self.posDot[n_state[2]]*16)
+        #return (self.distance[n_state[0]] *4) +self.actions[n_state[1]]
         util.raiseNotDefined()
 
 
@@ -476,12 +482,30 @@ class QLearningAgent(BustersAgent):
                 return action
 
         flip = util.flipCoin(self.epsilon)
-
+        """
+        if flip:
+            action=random.choice(legalActions)
+        
+        else:
+            action=self.getPolicy(state)
+        if action not in legalActions:
+            if action=="North":
+                action="East"
+            elif action=="East":
+                action="South"
+            elif action=="South":
+                action="West"
+            elif action=="West":
+                action="North"
+            #return random.choice(legalActions)
+        #return self.getPolicy(state)
+        #return action
+        """
         if flip:
             return random.choice(legalActions)
         return self.getPolicy(state)
-
-
+        
+        
     def update(self, state, action, nextState, reward):
         """
             The parent class calls this to observe a
@@ -532,9 +556,20 @@ class QLearningAgent(BustersAgent):
         print("(Action,state.action)=",(action,n_state[1]))
         if action == n_state[1]:
             reward += 5
+        
         else:
             reward -= 5
+            
+        if action == n_state[2]:
+            reward += 2
+        
+        if state.getNumFood==0:
+            reward+=2
+        
+        elif action!=n_state[2] and n_state[2]!=None:
+            reward -= 2
         print("Reward funciton returns:",reward)
+
         return reward        
         util.raiseNotDefined()
 

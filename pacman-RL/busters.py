@@ -263,6 +263,26 @@ class GameState(object):
                     if self.hasFood(i, j):
                         foodPosition = i, j
                         distance = util.manhattanDistance(pacmanPosition, foodPosition)
+                        x_dif = x - i #11
+                        y_dif = y - j #-6
+                        pos = ""
+                        
+                        if(y_dif == 0 or abs(x_dif) > abs(y_dif)):#the more important is EAST/WEST
+                            if(x_dif > 0):
+                                pos = "West"
+                            else:
+                                pos = "East"
+                        else:#more significant NORTH/SOUTH
+                            if(y_dif > 0):
+                                pos = "South"
+                            else:
+                                pos = "North"
+                        if self.getDistanceNearestFood()==None:
+                            pos="None"
+                        
+                                        
+                        
+                        """
                         if x==i and y<j:
                             direc=0
                         elif x<i and y<j:
@@ -281,11 +301,15 @@ class GameState(object):
                             direc=7
                         else:
                             direc=8
+                        
                         a.append(direc)
-                        nearest.append([distance,nearest])
+                        """
+                        a.append(pos)
+                        nearest.append([distance,pos])
             index=sorted(range(len(nearest)), key=lambda i: nearest[i], reverse=True)[:2]
             for i in index:
                 b.append(a[i])
+            """
             n=b.count(0)
             ne=b.count(1)
             e=b.count(2)
@@ -297,18 +321,30 @@ class GameState(object):
             er=b.count(8)
             s=[n,ne,e,se,s,sw,w,nw,er]
             print(s)
+            """
+            n=b.count("North")
+            
+            e=b.count("East")
+            
+            so=b.count("South")
+            
+            w=b.count("West")
+            non=b.count("None")
+            
+            s=[n,e,so,w,non]            
+
             
             destination=s.index(max(s))
             print("Most of the closest dots are on:",destination)
             if destination==0:
-                pos2="NORTH"
-            if destination==1 or destination==2 or destination==3:
-                pos2="EAST"
+                pos2="North"
+            if destination==1:
+                pos2="East"
+            if destination==2:
+                pos2="South"
+            if destination==3:
+                pos2="West"
             if destination==4:
-                pos2="SOUTH"
-            if destination==5 or destination==6 or destination==7:
-                pos2="WEST"
-            if destination==8:
                 pos2=None
             return pos2
             
